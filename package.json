@@ -1,6 +1,6 @@
 {
   "name": "callback-to-async-iterator",
-  "version": "1.0.0",
+  "version": "0.9.0",
   "description": "Turn any callback-based listener into an async iterator.",
   "repository": {
     "type": "git",
