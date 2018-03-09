@@ -41,6 +41,23 @@ console.log('Done!')
 
 This module will automatically buffer incoming data if `.next` hasn't been called yet.
 
+### Options
+
+- `onClose`: A function that's called with whatever you resolve from the listener after the async iterator is done, perfect to do cleanup
+- `onError`: A function that's called with any error that happens in the listener or async iterator
+
+```js
+asyncify(listenToNewMessages, {
+  // Close the database connection when the async iterator is done
+  // NOTE: This is passed whatever the listener resolves the returned promise with, in this case listenToNewMessages resolves with the database connection but it could be whatever you desire
+  onClose: (connection) => { connection.close(); },
+  // Log errors to your error tracking system
+  onError: (err) => {
+    errorTracking.capture(err);
+  }
+})
+```
+
 ## Credits
 
 This module is heavily based on the [event emitter to async iterator](https://github.com/apollographql/graphql-subscriptions/blob/master/src/event-emitter-to-async-iterator.ts) utility used in `graphql-js`. Also big shoutout to [@ForbesLindesay](https://github.com/ForbesLindesay) who helped a ton with the initial implementation and understanding the problem.
