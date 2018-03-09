@@ -1,0 +1,39 @@
+{
+  "name": "callback-to-async-iterator",
+  "version": "1.0.0",
+  "description": "Turn any callback-based listener into an async iterator.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/withspectrum/callback-to-async-iterator.git"
+  },
+  "main": "dist/index.js",
+  "license": "MIT",
+  "scripts": {
+    "precommit": "lint-staged",
+    "prebuild": "rimraf dist",
+    "build": "babel src --out-dir dist --ignore '*.test.js'",
+    "test": "jest src",
+    "prettier": "prettier --write --single-quote --trailing-comma es5 'src/**/*.js'",
+    "flow": "flow src"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write --single-quote --trailing-comma es5",
+      "git add"
+    ]
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-flow": "^6.23.0",
+    "flow-bin": "^0.66.0",
+    "husky": "^0.14.3",
+    "jest": "^21.1.0",
+    "lint-staged": "^4.2.2",
+    "prettier": "^1.7.0",
+    "rimraf": "^2.6.2"
+  },
+  "dependencies": {
+    "iterall": "^1.0.0"
+  }
+}
