@@ -12,9 +12,10 @@ function callbackToAsyncIterator<CallbackInput: any, ReturnVal: any>(
   options?: {
     onError?: (err: Error) => void,
     onClose?: (arg?: ?ReturnVal) => void,
+    buffering?: boolean,
   } = {}
 ) {
-  const { onError = defaultOnError, onClose } = options;
+  const { onError = defaultOnError, buffering = true, onClose } = options;
   try {
     let pullQueue = [];
     let pushQueue = [];
@@ -32,7 +33,7 @@ function callbackToAsyncIterator<CallbackInput: any, ReturnVal: any>(
     function pushValue(value) {
       if (pullQueue.length !== 0) {
         pullQueue.shift()({ value, done: false });
-      } else {
+      } else if (buffering === true) {
         pushQueue.push(value);
       }
     }
@@ -57,11 +58,11 @@ function callbackToAsyncIterator<CallbackInput: any, ReturnVal: any>(
       }
     }
 
-    return ({
-      next(): Promise<{ value?: CallbackInput, done: bool }> {
+    return {
+      next(): Promise<{ value?: CallbackInput, done: boolean }> {
         return listening ? pullValue() : this.return();
       },
-      return(): Promise<{ value: typeof undefined, done: bool }> {
+      return(): Promise<{ value: typeof undefined, done: boolean }> {
         emptyQueue();
         return Promise.resolve({ value: undefined, done: true });
       },
@@ -73,14 +74,14 @@ function callbackToAsyncIterator<CallbackInput: any, ReturnVal: any>(
       [$$asyncIterator]() {
         return this;
       },
-    });
+    };
   } catch (err) {
     onError(err);
-    return ({
+    return {
       next() {
         return Promise.reject(err);
       },
-      return(){
+      return() {
         return Promise.reject(err);
       },
       throw(error) {
@@ -89,8 +90,8 @@ function callbackToAsyncIterator<CallbackInput: any, ReturnVal: any>(
       [$$asyncIterator]() {
         return this;
       },
-    });
+    };
   }
-};
+}
 
 export default callbackToAsyncIterator;
