@@ -13,12 +13,12 @@
     "prebuild": "rimraf dist",
     "build": "babel src --out-dir dist --ignore '*.test.js'",
     "test": "jest src",
-    "prettier": "prettier --write --single-quote --trailing-comma es5 'src/**/*.js'",
+    "prettier": "prettier --write 'src/**/*.js'",
     "flow": "flow src"
   },
   "lint-staged": {
     "*.js": [
-      "prettier --write --single-quote --trailing-comma es5",
+      "prettier --write",
       "git add"
     ]
   },
