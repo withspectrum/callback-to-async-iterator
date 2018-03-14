@@ -45,7 +45,8 @@ This module will automatically buffer incoming data if `.next` hasn't been calle
 
 - `onClose`: A function that's called with whatever you resolve from the listener after the async iterator is done, perfect to do cleanup
 - `onError`: A function that's called with any error that happens in the listener or async iterator
-- `buffering`: (default: `true`) Whether incoming values should be buffered before the async iterator starts listening or not
+- `buffering`: (default: `true`) Whether incoming values should be buffered in between requests for the next value in the async iterable (note: disabling this will make your iterator "lossy" if you don't immediately call `.next()`)
+
 
 ```js
 asyncify(listenToNewMessages, {
@@ -56,7 +57,6 @@ asyncify(listenToNewMessages, {
   onError: (err) => {
     errorTracking.capture(err);
   },
-  // Don't buffer incoming messages before the async iterator starts listening
   buffering: false
 })
 ```
