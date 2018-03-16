@@ -14,7 +14,8 @@
     "build": "babel src --out-dir dist --ignore '*.test.js'",
     "test": "jest src",
     "prettier": "prettier --write 'src/**/*.js'",
-    "flow": "flow src"
+    "flow": "flow src",
+    "prepare": "yarn build"
   },
   "lint-staged": {
     "*.js": [
