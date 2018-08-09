@@ -30,7 +30,7 @@
     "flow-bin": "^0.66.0",
     "husky": "^0.14.3",
     "jest": "^21.2.1",
-    "lint-staged": "^4.2.2",
+    "lint-staged": "^4.3.0",
     "prettier": "^1.14.2",
     "rimraf": "^2.6.2"
   },
