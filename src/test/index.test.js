@@ -95,6 +95,38 @@ describe('options', () => {
     });
   });
 
+  it('should call onError with an error thrown by a non async onClose', async () => {
+    const error = new Error('Bla bla');
+    const listener = (cb: () => void) => Promise.resolve();
+
+    expect.assertions(1);
+    const iter = asyncify(listener, {
+      onClose: () => {
+        throw error;
+      },
+      onError: err => {
+        expect(err).toEqual(error);
+      },
+    });
+    await iter.return();
+  });
+
+  it('should call onError with an error thrown by an async onClose', async () => {
+    const error = new Error('Bla bla');
+    const listener = (cb: () => void) => Promise.resolve();
+
+    expect.assertions(1);
+    const iter = asyncify(listener, {
+      onClose: async () => {
+        throw error;
+      },
+      onError: err => {
+        expect(err).toEqual(error);
+      },
+    });
+    await iter.return();
+  });
+
   it('should call onClose with the return value from the listener', async () => {
     const returnValue = 'asdf';
     const listener = (cb: () => void) =>
