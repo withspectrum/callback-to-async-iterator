@@ -145,6 +145,24 @@ describe('options', () => {
     await iter.return();
   });
 
+  it('should call onClose with the return value from an listener only after the promise resolves', async () => {
+    const returnValue = 'asdf';
+    const listener = (cb: () => void) =>
+      new Promise(res => {
+        res(returnValue);
+      });
+
+    expect.hasAssertions();
+    const iter = asyncify(listener, {
+      onClose: val => {
+        expect(val).toEqual(returnValue);
+      },
+    });
+    // Wait a tick so that the promise resolves with the return value
+    iter.return();
+    await new Promise(res => setTimeout(res, 10));
+  });
+
   describe('buffering', () => {
     it('should not buffer incoming values if disabled', async () => {
       const listener = (cb: (arg: number) => void) =>
