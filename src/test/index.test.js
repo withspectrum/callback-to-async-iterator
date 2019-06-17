@@ -95,6 +95,38 @@ describe('options', () => {
     });
   });
 
+  it('should call onError with an error thrown by a non async onClose', async () => {
+    const error = new Error('Bla bla');
+    const listener = (cb: () => void) => Promise.resolve();
+
+    expect.assertions(1);
+    const iter = asyncify(listener, {
+      onClose: () => {
+        throw error;
+      },
+      onError: err => {
+        expect(err).toEqual(error);
+      },
+    });
+    await iter.return();
+  });
+
+  it('should call onError with an error thrown by an async onClose', async () => {
+    const error = new Error('Bla bla');
+    const listener = (cb: () => void) => Promise.resolve();
+
+    expect.assertions(1);
+    const iter = asyncify(listener, {
+      onClose: async () => {
+        throw error;
+      },
+      onError: err => {
+        expect(err).toEqual(error);
+      },
+    });
+    await iter.return();
+  });
+
   it('should call onClose with the return value from the listener', async () => {
     const returnValue = 'asdf';
     const listener = (cb: () => void) =>
@@ -111,6 +143,24 @@ describe('options', () => {
     // Wait a tick so that the promise resolves with the return value
     await new Promise(res => setTimeout(res, 10));
     await iter.return();
+  });
+
+  it('should call onClose with the return value from an listener only after the promise resolves', async () => {
+    const returnValue = 'asdf';
+    const listener = (cb: () => void) =>
+      new Promise(res => {
+        res(returnValue);
+      });
+
+    expect.hasAssertions();
+    const iter = asyncify(listener, {
+      onClose: val => {
+        expect(val).toEqual(returnValue);
+      },
+    });
+    // Wait a tick so that the promise resolves with the return value
+    iter.return();
+    await new Promise(res => setTimeout(res, 10));
   });
 
   describe('buffering', () => {

@@ -11,7 +11,7 @@ function callbackToAsyncIterator<CallbackInput: any, ReturnVal: any>(
   listener: ((arg: CallbackInput) => any) => Promise<?ReturnVal>,
   options?: {
     onError?: (err: Error) => void,
-    onClose?: (arg?: ?ReturnVal) => void,
+    onClose?: (arg?: ?ReturnVal) => Promise<void> | void,
     buffering?: boolean,
   } = {}
 ) {
@@ -21,10 +21,14 @@ function callbackToAsyncIterator<CallbackInput: any, ReturnVal: any>(
     let pushQueue = [];
     let listening = true;
     let listenerReturnValue;
+    let listenerReturnedValue = false;
+    let closingWaitingOnListenerReturnValue = false;
     // Start listener
     listener(value => pushValue(value))
       .then(a => {
         listenerReturnValue = a;
+        listenerReturnedValue = true;
+        if (closingWaitingOnListenerReturnValue) emptyQueue();
       })
       .catch(err => {
         onError(err);
@@ -49,12 +53,23 @@ function callbackToAsyncIterator<CallbackInput: any, ReturnVal: any>(
     }
 
     function emptyQueue() {
+      if (onClose && !listenerReturnedValue) {
+        closingWaitingOnListenerReturnValue = true;
+        return;
+      }
       if (listening) {
         listening = false;
         pullQueue.forEach(resolve => resolve({ value: undefined, done: true }));
         pullQueue = [];
         pushQueue = [];
-        onClose && onClose(listenerReturnValue);
+        if (onClose) {
+          try {
+            const closeRet = onClose(listenerReturnValue);
+            if (closeRet) closeRet.catch(e => onError(e));
+          } catch (e) {
+            onError(e);
+          }
+        }
       }
     }
 
@@ -66,7 +81,7 @@ function callbackToAsyncIterator<CallbackInput: any, ReturnVal: any>(
         emptyQueue();
         return Promise.resolve({ value: undefined, done: true });
       },
-      throw(error) {
+      throw(error: Error) {
         emptyQueue();
         onError(error);
         return Promise.reject(error);
@@ -84,7 +99,7 @@ function callbackToAsyncIterator<CallbackInput: any, ReturnVal: any>(
       return() {
         return Promise.reject(err);
       },
-      throw(error) {
+      throw(error: Error) {
         return Promise.reject(error);
       },
       [$$asyncIterator]() {
